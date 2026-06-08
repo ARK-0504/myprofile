@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abhiram Ratan | Data Analyst</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-logo">A18</span>
+        <div>
+          <h1>Abhiram Ratan</h1>
+          <p>Data Analyst</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="#about">About</a>
+        <a href="#services">Expertise</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow">Automotive Dynamics & Data Intelligence</p>
+          <h2>Data Analysis and Tester on Automobile Dynamics</h2>
+          <p>Designing and validating advanced ADAS Level 3 solutions for safer, smarter vehicles. I combine deep analytical insight with robust testing practice for next-generation automotive systems.</p>
+          <a href="#contact" class="cta-button">Contact Me</a>
+        </div>
+      </section>
+
+      <section class="section-card" id="about">
+        <div class="section-header">
+          <h2>About Me</h2>
+          <p>Focused on automotive data analysis and verification, I support the development of trusted driver assistance systems through rigorous testing and meaningful insights.</p>
+        </div>
+        <div class="info-grid">
+          <div>
+            <h3>Role</h3>
+            <p>Data Analyst</p>
+          </div>
+          <div>
+            <h3>Domain</h3>
+            <p>Automobile Dynamics</p>
+          </div>
+          <div>
+            <h3>Focus</h3>
+            <p>ADAS Level 3 Development</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="services">
+        <div class="section-header">
+          <h2>What I Do</h2>
+          <p>From data evaluation to system validation, I specialize in building dependable automotive assistance capabilities.</p>
+        </div>
+        <div class="services-grid">
+          <article>
+            <h3>ADAS Level 3 Development</h3>
+            <p>Supporting advanced driver assistance system design for conditional automation, ensuring reliability and performance across real-world scenarios.</p>
+          </article>
+          <article>
+            <h3>Automobile Dynamics Testing</h3>
+            <p>Analyzing vehicle behavior, sensor fusion data, and dynamic response to validate safety-critical systems under varied driving conditions.</p>
+          </article>
+          <article>
+            <h3>Data-Driven Validation</h3>
+            <p>Turning complex datasets into actionable insights that strengthen design decisions and accelerate deployment of automotive technologies.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-card contact-card" id="contact">
+        <div class="section-header">
+          <h2>Contact</h2>
+          <p>Want to discuss automotive analytics or ADAS testing? Reach out by email and let analytics meet automotive innovation.</p>
+        </div>
+        <div class="contact-details">
+          <div>
+            <h3>Email</h3>
+            <a href="mailto:notark@gmail.com">notark@gmail.com</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="game-panel" id="gamePanel" aria-hidden="true">
+      <div class="game-header">
+        <div>
+          <h3>Mini Race</h3>
+          <p>Use ← and → to steer. Avoid the obstacles and rack up the score.</p>
+        </div>
+        <button class="close-game" id="closeGame" aria-label="Close game panel">×</button>
+      </div>
+      <div class="game-board">
+        <canvas id="raceCanvas" width="320" height="520" aria-label="Mini car racing game"></canvas>
+      </div>
+      <div class="game-info">
+        <span>Score: <strong id="gameScore">0</strong></span>
+        <span>Level: <strong id="gameLevel">1</strong></span>
+        <button id="restartGame" class="secondary-button">Restart</button>
+      </div>
+      <div class="game-footnote">Open or hide the game with the button below.</div>
+    </div>
+
+    <button class="game-toggle" id="gameToggle" aria-expanded="false" aria-label="Toggle mini race game">▶</button>
+
+    <footer class="site-footer">
+      <p>Built by Abhiram Ratan • Midnight Purple & Black Portfolio</p>
+    </footer>
+  </div>
+
+  <script>
+    const gamePanel = document.getElementById('gamePanel');
+    const gameToggle = document.getElementById('gameToggle');
+    const closeGame = document.getElementById('closeGame');
+    const restartGame = document.getElementById('restartGame');
+    const scoreEl = document.getElementById('gameScore');
+    const levelEl = document.getElementById('gameLevel');
+    const canvas = document.getElementById('raceCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let animationId;
+    let score = 0;
+    let level = 1;
+    let speed = 2.4;
+    let isPlaying = false;
+    let obstacles = [];
+    const track = {
+      x: 32,
+      width: canvas.width - 64,
+      laneCount: 3,
+      laneWidth: 76
+    };
+    const player = {
+      x: canvas.width / 2 - 18,
+      y: canvas.height - 110,
+      width: 36,
+      height: 56,
+      vx: 0,
+      maxVx: 5
+    };
+    const keys = { ArrowLeft: false, ArrowRight: false };
+
+    function drawRoundedRect(x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function openPanel() {
+      gamePanel.classList.add('open');
+      gameToggle.textContent = '×';
+      gameToggle.setAttribute('aria-expanded', 'true');
+      gamePanel.setAttribute('aria-hidden', 'false');
+      if (!isPlaying) {
+        startGame();
+      }
+    }
+
+    function closePanel() {
+      gamePanel.classList.remove('open');
+      gameToggle.textContent = '▶';
+      gameToggle.setAttribute('aria-expanded', 'false');
+      gamePanel.setAttribute('aria-hidden', 'true');
+      cancelAnimationFrame(animationId);
+      isPlaying = false;
+    }
+
+    function togglePanel() {
+      if (gamePanel.classList.contains('open')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    function startGame() {
+      score = 0;
+      level = 1;
+      speed = 2.4;
+      player.x = canvas.width / 2 - player.width / 2;
+      obstacles = Array.from({ length: 5 }, (_, index) => createObstacle(-index * 130 - 100));
+      isPlaying = true;
+      scoreEl.textContent = score;
+      levelEl.textContent = level;
+      animationId = requestAnimationFrame(loop);
+    }
+
+    function createObstacle(offsetY) {
+      const lane = Math.floor(Math.random() * track.laneCount);
+      const x = track.x + lane * track.laneWidth + (track.laneWidth - 38) / 2 + (Math.random() * 10 - 5);
+      const type = ['car', 'cone', 'barrier'][Math.floor(Math.random() * 3)];
+      const size = type === 'car' ? { width: 38, height: 54 } : type === 'barrier' ? { width: 52, height: 40 } : { width: 24, height: 30 };
+      const colors = {
+        car: ['#d88fff', '#f6b0ff', '#a854ff'],
+        cone: ['#ff7d47', '#ffb36c', '#ff9e5b'],
+        barrier: ['#6f54ff', '#8768ff', '#4f3bb1']
+      };
+      return {
+        x,
+        y: offsetY,
+        width: size.width,
+        height: size.height,
+        type,
+        color: colors[type][Math.floor(Math.random() * colors[type].length)]
+      };
+    }
+
+    function drawRoad() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#12091d');
+      gradient.addColorStop(1, '#06020a');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0e0816';
+      ctx.fillRect(track.x - 12, 0, track.width + 24, canvas.height);
+      ctx.fillStyle = '#190f31';
+      ctx.fillRect(track.x, 0, track.width, canvas.height);
+
+      ctx.strokeStyle = '#4f3bb1';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(track.x + 4, 10, track.width - 8, canvas.height - 20);
+
+      ctx.strokeStyle = '#7b4dff';
+      ctx.lineWidth = 2;
+      for (let y = -30; y < canvas.height; y += 36) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, y + ((performance.now() / 8) % 36));
+        ctx.lineTo(canvas.width / 2, y + 18 + ((performance.now() / 8) % 36));
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      for (let line = 1; line < track.laneCount; line++) {
+        const x = track.x + track.laneWidth * line;
+        for (let y = -20; y < canvas.height; y += 30) {
+          ctx.beginPath();
+          ctx.moveTo(x, y + ((performance.now() / 8) % 30));
+          ctx.lineTo(x, y + 16 + ((performance.now() / 8) % 30));
+          ctx.stroke();
+        }
+      }
+
+      ctx.fillStyle = '#2a203f';
+      ctx.fillRect(track.x - 28, 0, 16, canvas.height);
+      ctx.fillRect(track.x + track.width + 12, 0, 16, canvas.height);
+    }
+
+    function drawPlayer() {
+      drawRoundedRect(player.x, player.y, player.width, player.height, 12);
+      ctx.fillStyle = '#7b4dff';
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      drawRoundedRect(player.x + 6, player.y + 10, player.width - 12, 24, 8);
+      ctx.fill();
+
+      ctx.fillStyle = '#0b0713';
+      drawRoundedRect(player.x + 8, player.y + 34, player.width - 16, 12, 6);
+      ctx.fill();
+
+      ctx.fillStyle = '#c8c0ff';
+      ctx.fillRect(player.x + 6, player.y + 16, 10, 10);
+      ctx.fillRect(player.x + player.width - 16, player.y + 16, 10, 10);
+
+      ctx.fillStyle = '#1a1325';
+      ctx.fillRect(player.x + 4, player.y + player.height - 8, 10, 6);
+      ctx.fillRect(player.x + player.width - 14, player.y + player.height - 8, 10, 6);
+    }
+
+    function drawObstacles() {
+      obstacles.forEach((obs) => {
+        if (obs.type === 'car') {
+          drawRoundedRect(obs.x, obs.y, obs.width, obs.height, 10);
+          ctx.fillStyle = obs.color;
+          ctx.fill();
+          ctx.fillStyle = '#0b0713';
+          ctx.fillRect(obs.x + 6, obs.y + 10, obs.width - 12, 18);
+          ctx.fillStyle = '#ffd9ff';
+          ctx.fillRect(obs.x + 8, obs.y + 14, 8, 8);
+          ctx.fillRect(obs.x + obs.width - 16, obs.y + 14, 8, 8);
+        } else if (obs.type === 'barrier') {
+          drawRoundedRect(obs.x, obs.y, obs.width, obs.height, 10);
+          ctx.fillStyle = obs.color;
+          ctx.fill();
+          ctx.fillStyle = '#0b0713';
+          ctx.fillRect(obs.x + 8, obs.y + 10, obs.width - 16, 10);
+        } else {
+          ctx.fillStyle = obs.color;
+          ctx.beginPath();
+          ctx.moveTo(obs.x + obs.width / 2, obs.y);
+          ctx.lineTo(obs.x, obs.y + obs.height);
+          ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(obs.x + obs.width / 2 - 4, obs.y + obs.height - 10, 8, 10);
+        }
+      });
+    }
+
+    function update() {
+      if (keys.ArrowLeft) {
+        player.vx = -player.maxVx;
+      } else if (keys.ArrowRight) {
+        player.vx = player.maxVx;
+      } else {
+        player.vx = 0;
+      }
+      player.x += player.vx;
+      const minX = track.x + 12;
+      const maxX = track.x + track.width - player.width - 12;
+      player.x = Math.max(minX, Math.min(maxX, player.x));
+
+      obstacles.forEach((obs) => {
+        obs.y += speed;
+        if (obs.y > canvas.height + 30) {
+          Object.assign(obs, createObstacle(-120 - Math.random() * 160));
+          score += 12;
+          const newLevel = 1 + Math.floor(score / 120);
+          if (newLevel > level) {
+            level = newLevel;
+            speed = Math.min(speed + 0.4, 6.2);
+          }
+          speed = Math.min(speed + 0.03, 6.8);
+        }
+      });
+    }
+
+    function detectCollision() {
+      return obstacles.some((obs) => {
+        return (
+          player.x < obs.x + obs.width &&
+          player.x + player.width > obs.x &&
+          player.y < obs.y + obs.height &&
+          player.y + player.height > obs.y
+        );
+      });
+    }
+
+    function showGameOver() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 22px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 12);
+      ctx.font = '14px Inter, sans-serif';
+      ctx.fillText(`Score ${score} · Level ${level}`, canvas.width / 2, canvas.height / 2 + 12);
+      ctx.fillText('Press Restart to try again', canvas.width / 2, canvas.height / 2 + 36);
+    }
+
+    function loop() {
+      drawRoad();
+      drawPlayer();
+      drawObstacles();
+      update();
+      scoreEl.textContent = score;
+      levelEl.textContent = level;
+
+      if (detectCollision()) {
+        cancelAnimationFrame(animationId);
+        isPlaying = false;
+        showGameOver();
+        return;
+      }
+
+      animationId = requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        keys[event.key] = true;
+        if (!isPlaying && gamePanel.classList.contains('open')) {
+          startGame();
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        keys[event.key] = false;
+      }
+    });
+
+    gameToggle.addEventListener('click', togglePanel);
+    closeGame.addEventListener('click', closePanel);
+    restartGame.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
