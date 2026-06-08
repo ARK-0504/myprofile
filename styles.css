@@ -290,6 +290,7 @@ body {
   background: radial-gradient(circle at top, rgba(123, 77, 255, 0.12), transparent 45%),
     linear-gradient(180deg, rgba(20, 11, 38, 0.95), #090510 100%);
   border-radius: 22px;
+  position: relative;
 }
 
 .game-board canvas {
@@ -297,7 +298,44 @@ body {
   height: auto;
   border-radius: 18px;
   background: #0b0713;
+  display: block;
 }
+
+.game-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: none;
+  justify-content: center;
+  gap: 16px;
+}
+
+.game-controls.active {
+  display: flex;
+}
+
+.game-control-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(123, 77, 255, 0.3);
+  border: 2px solid rgba(123, 77, 255, 0.6);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  display: grid;
+  place-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.game-control-btn:active,
+.game-control-btn.pressed {
+  background: rgba(123, 77, 255, 0.7);
+}
+
 
 .game-info {
   display: flex;
@@ -368,5 +406,14 @@ body {
   .game-toggle {
     right: 14px;
     bottom: 14px;
+  }
+  .game-controls.active {
+    display: flex;
+  }
+}
+
+@media (min-width: 801px) {
+  .game-controls {
+    display: none !important;
   }
 }
